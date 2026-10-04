@@ -32,6 +32,5 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
         run: |
           brew tap zaubermaerchen/tap
-          cp Formula/khsier.rb "$(brew --repository zaubermaerchen/tap)/Formula/khsier.rb"
           brew install zaubermaerchen/tap/khsier
           brew test zaubermaerchen/tap/khsier
