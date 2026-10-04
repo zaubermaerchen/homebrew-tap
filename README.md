@@ -39,3 +39,9 @@ Update Homebrew and upgrade the installed formulae:
 brew update
 brew upgrade khsier pipewisp dam outage sluice
 ```
+
+## Release automation
+
+Published releases can open formula-update PRs through the tap's shared workflow.
+See [release automation setup and rollout](docs/release-automation.md) for the
+GitHub App's minimum permissions, trusted workflow references and khsier-first rollout.
