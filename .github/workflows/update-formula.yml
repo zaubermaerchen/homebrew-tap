@@ -94,7 +94,7 @@ jobs:
           FORMULA: ${{ inputs.formula }}
           HOMEBREW_NO_AUTO_UPDATE: 1
         run: |
-          brew tap zaubermaerchen/tap "$GITHUB_WORKSPACE"
+          brew tap zaubermaerchen/tap
           cp release-formula/candidate.rb "$(brew --repository zaubermaerchen/tap)/Formula/$FORMULA.rb"
           brew install "zaubermaerchen/tap/$FORMULA"
           brew test "zaubermaerchen/tap/$FORMULA"
