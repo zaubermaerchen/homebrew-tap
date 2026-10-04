@@ -1,0 +1,155 @@
+name: Update release formula
+
+on:
+  workflow_call:
+    inputs:
+      formula:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+      automation-ref:
+        description: Reviewed tap revision, matching this reusable workflow's ref
+        default: main
+        type: string
+      app-id:
+        required: true
+        type: string
+    secrets:
+      app-private-key:
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: homebrew-formula-${{ inputs.formula }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate caller and trusted revision
+        env:
+          FORMULA: ${{ inputs.formula }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          AUTOMATION_REF: ${{ inputs.automation-ref }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          formula = os.environ['FORMULA']
+          assert formula in ('khsier', 'pipewisp', 'dam', 'outage', 'sluice'), 'Unsupported formula'
+          assert os.environ['SOURCE_REPOSITORY'] == 'zaubermaerchen/' + formula, 'Unexpected caller'
+          assert re.fullmatch(r'main|[0-9a-f]{40}', os.environ['AUTOMATION_REF']), 'Invalid tap revision'
+          PY
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: zaubermaerchen/homebrew-tap
+          ref: ${{ inputs.automation-ref }}
+          persist-credentials: false
+      - name: Generate formula from published release
+        env:
+          FORMULA: ${{ inputs.formula }}
+          TAG: ${{ inputs.tag }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 -m unittest discover -s tests -v
+          git fetch origin main
+          mkdir release-formula
+          git show "FETCH_HEAD:Formula/$FORMULA.rb" > "Formula/$FORMULA.rb"
+          cp "Formula/$FORMULA.rb" release-formula/base.rb
+          python3 scripts/update_formula.py --formula "$FORMULA" --tag "$TAG" --source-repository "$SOURCE_REPOSITORY"
+          cp "Formula/$FORMULA.rb" release-formula/candidate.rb
+          git diff --check
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-formula
+          path: release-formula/
+          if-no-files-found: error
+          retention-days: 1
+
+  brew-test:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: zaubermaerchen/homebrew-tap
+          ref: ${{ inputs.automation-ref }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-formula
+          path: release-formula
+      - uses: Homebrew/actions/setup-homebrew@9f17989bd508c794353d974d1756f23b0bcf10c1 # main
+      - name: Install and test generated formula
+        env:
+          FORMULA: ${{ inputs.formula }}
+          HOMEBREW_NO_AUTO_UPDATE: 1
+        run: |
+          brew tap zaubermaerchen/tap "$GITHUB_WORKSPACE"
+          cp release-formula/candidate.rb "$(brew --repository zaubermaerchen/tap)/Formula/$FORMULA.rb"
+          brew install "zaubermaerchen/tap/$FORMULA"
+          brew test "zaubermaerchen/tap/$FORMULA"
+
+  pull-request:
+    needs: [prepare, brew-test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: zaubermaerchen/homebrew-tap
+          ref: main
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-formula
+          path: release-formula
+      - name: Reject changes to the verified formula base
+        env:
+          FORMULA: ${{ inputs.formula }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          git show "HEAD:Formula/$FORMULA.rb" > "$RUNNER_TEMP/current-formula.rb"
+          cmp "$RUNNER_TEMP/current-formula.rb" release-formula/base.rb
+          python3 - <<'PY'
+          import os, pathlib, re
+          current = pathlib.Path(os.environ['RUNNER_TEMP'], 'current-formula.rb').read_text()
+          version = re.search(r'^  version "([0-9]+\.[0-9]+\.[0-9]+)"$', current, re.M)
+          assert version, 'Unexpected current formula version'
+          target = os.environ['TAG']
+          assert re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', target), 'Invalid tag'
+          assert tuple(map(int, target[1:].split('.'))) >= tuple(map(int, version[1].split('.'))), 'Release is older than main'
+          PY
+          cp release-formula/candidate.rb "Formula/$FORMULA.rb"
+      # Mint only after all release parsing, downloads and executable tests succeed.
+      - uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        id: app
+        with:
+          app-id: ${{ inputs.app-id }}
+          private-key: ${{ secrets.app-private-key }}
+          owner: zaubermaerchen
+          repositories: homebrew-tap
+          permission-contents: write
+          permission-pull-requests: write
+      - uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        with:
+          token: ${{ steps.app.outputs.token }}
+          branch: automation/update-${{ inputs.formula }}-${{ inputs.tag }}
+          base: main
+          add-paths: Formula/${{ inputs.formula }}.rb
+          commit-message: 'Update ${{ inputs.formula }} to ${{ inputs.tag }}'
+          title: 'Update ${{ inputs.formula }} to ${{ inputs.tag }}'
+          body: |
+            Update the formula from the published release's SHA256SUMS.
+
+            Source: https://github.com/${{ github.repository }}/releases/tag/${{ inputs.tag }}
+            Validation: updater tests and Homebrew install/test on Linux and macOS.
+          delete-branch: true
