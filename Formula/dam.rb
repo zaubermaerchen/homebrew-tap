@@ -1,26 +1,26 @@
 class Dam < Formula
   desc "Hold Unix pipeline flow until release conditions are satisfied"
   homepage "https://github.com/zaubermaerchen/dam"
-  version "0.5.1"
+  version "0.5.2"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/zaubermaerchen/dam/releases/download/v0.5.1/dam_v0.5.1_darwin_arm64.tar.gz"
-      sha256 "bd141be3d482db1d62ae8d094a95b96f4ea4748d553863ec032290184b5e8a12"
+      url "https://github.com/zaubermaerchen/dam/releases/download/v0.5.2/dam_v0.5.2_darwin_arm64.tar.gz"
+      sha256 "3c3d6a46b129234d1680fd5671e3a8ca86b22c972abfc5a1a59be184e30627ac"
     else
-      url "https://github.com/zaubermaerchen/dam/releases/download/v0.5.1/dam_v0.5.1_darwin_amd64.tar.gz"
-      sha256 "5df5ed7757a1a59840d415272202d4b5fb995b8241e8082a4e9f47ffcf9e080e"
+      url "https://github.com/zaubermaerchen/dam/releases/download/v0.5.2/dam_v0.5.2_darwin_amd64.tar.gz"
+      sha256 "bf5922cb7d668dca713e945e2d87d7a1a7cdc91dbe4d1031f87393e922be24f7"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/zaubermaerchen/dam/releases/download/v0.5.1/dam_v0.5.1_linux_arm64.tar.gz"
-      sha256 "35fd00da3286ea1a06b13c55cf198d1fa58d0c8dca2468ed4a3c6f4b9e6bbcfd"
+      url "https://github.com/zaubermaerchen/dam/releases/download/v0.5.2/dam_v0.5.2_linux_arm64.tar.gz"
+      sha256 "8dea560a3172ebdc180af25ef1e78986ce89b2ab9ea9dffebeb31b7fd1704e4c"
     else
-      url "https://github.com/zaubermaerchen/dam/releases/download/v0.5.1/dam_v0.5.1_linux_amd64.tar.gz"
-      sha256 "098fff4dbe36695c2f0168c81b336b4279b334d8bac097c5aac4dc546c2a3af5"
+      url "https://github.com/zaubermaerchen/dam/releases/download/v0.5.2/dam_v0.5.2_linux_amd64.tar.gz"
+      sha256 "d6a2d5eb195d3fd2c77388bad233166192a344c9ba1244e966d4a2b993124489"
     end
   end
 
