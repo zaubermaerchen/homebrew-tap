@@ -2,6 +2,7 @@
 from pathlib import Path
 import unittest
 import os
+import re
 import subprocess
 import tempfile
 import textwrap
@@ -10,6 +11,20 @@ WORKFLOW = Path(__file__).resolve().parents[1] / '.github/workflows/update-formu
 
 
 class WorkflowContractTests(unittest.TestCase):
+    def test_normal_checks_cover_all_formulae_on_both_platforms(self):
+        root = WORKFLOW.parents[2]
+        workflow = (root / '.github/workflows/test.yml').read_text()
+        brew = workflow.split('  brew:\n', 1)[1]
+        selected = re.search(r'formula: \[([^\]]+)\]', brew)
+        self.assertIsNotNone(selected, 'Native checks must select every formula')
+        formulae = [name.strip() for name in selected.group(1).split(',')]
+        self.assertCountEqual(formulae, [path.stem for path in (root / 'Formula').glob('*.rb')])
+        self.assertIn('os: [ubuntu-latest, macos-latest]', brew)
+        self.assertIn('runs-on: ${{ matrix.os }}', brew)
+        self.assertIn('FORMULA: ${{ matrix.formula }}', brew)
+        self.assertIn('brew install "zaubermaerchen/tap/$FORMULA"', brew)
+        self.assertIn('brew test "zaubermaerchen/tap/$FORMULA"', brew)
+
     def test_writer_waits_for_validation_and_uses_scoped_app(self):
         workflow = WORKFLOW.read_text()
         writer = workflow.split('  pull-request:\n', 1)[1]

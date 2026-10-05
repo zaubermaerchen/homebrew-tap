@@ -17,20 +17,23 @@ jobs:
       - run: python3 -m unittest discover -s tests -v
       - run: git diff --check
   brew:
+    name: Brew ${{ matrix.formula }} (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
+        formula: [khsier, pipewisp, dam, outage, sluice]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
       - uses: Homebrew/actions/setup-homebrew@9f17989bd508c794353d974d1756f23b0bcf10c1 # main
-      - name: Install and test khsier
+      - name: Install and test formula
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
+          FORMULA: ${{ matrix.formula }}
         run: |
           brew tap zaubermaerchen/tap
-          brew install zaubermaerchen/tap/khsier
-          brew test zaubermaerchen/tap/khsier
+          brew install "zaubermaerchen/tap/$FORMULA"
+          brew test "zaubermaerchen/tap/$FORMULA"
