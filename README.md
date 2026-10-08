@@ -12,13 +12,14 @@ brew install zaubermaerchen/tap/pipewisp
 brew install zaubermaerchen/tap/dam
 brew install zaubermaerchen/tap/outage
 brew install zaubermaerchen/tap/sluice
+brew install zaubermaerchen/tap/trysudo
 ```
 
 Alternatively, add the tap first:
 
 ```sh
 brew tap zaubermaerchen/tap
-brew install khsier pipewisp dam outage sluice
+brew install khsier pipewisp dam outage sluice trysudo
 ```
 
 ## Available formulae
@@ -30,6 +31,7 @@ brew install khsier pipewisp dam outage sluice
 | [dam](https://github.com/zaubermaerchen/dam) | Hold flow until release conditions are satisfied |
 | [outage](https://github.com/zaubermaerchen/outage) | Cut flow when a condition is triggered |
 | [sluice](https://github.com/zaubermaerchen/sluice) | Switch flow between open and closed states |
+| [trysudo](https://github.com/zaubermaerchen/trysudo) | Run with sudo when allowed, otherwise directly |
 
 ## Upgrade
 
@@ -37,7 +39,7 @@ Update Homebrew and upgrade the installed formulae:
 
 ```sh
 brew update
-brew upgrade khsier pipewisp dam outage sluice
+brew upgrade khsier pipewisp dam outage sluice trysudo
 ```
 
 ## Release automation

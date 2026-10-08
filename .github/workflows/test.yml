@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        formula: [khsier, pipewisp, dam, outage, sluice]
+        formula: [khsier, pipewisp, dam, outage, sluice, trysudo]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -34,6 +34,6 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
           FORMULA: ${{ matrix.formula }}
         run: |
-          brew tap zaubermaerchen/tap
+          test "$(git -C "$(brew --repository zaubermaerchen/tap)" rev-parse HEAD)" = "$GITHUB_SHA"
           brew install "zaubermaerchen/tap/$FORMULA"
           brew test "zaubermaerchen/tap/$FORMULA"

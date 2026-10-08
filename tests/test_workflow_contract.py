@@ -22,6 +22,9 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn('os: [ubuntu-latest, macos-latest]', brew)
         self.assertIn('runs-on: ${{ matrix.os }}', brew)
         self.assertIn('FORMULA: ${{ matrix.formula }}', brew)
+        guard = 'test "$(git -C "$(brew --repository zaubermaerchen/tap)" rev-parse HEAD)" = "$GITHUB_SHA"'
+        self.assertIn(guard, brew)
+        self.assertLess(brew.index(guard), brew.index('brew install'))
         self.assertIn('brew install "zaubermaerchen/tap/$FORMULA"', brew)
         self.assertIn('brew test "zaubermaerchen/tap/$FORMULA"', brew)
 
