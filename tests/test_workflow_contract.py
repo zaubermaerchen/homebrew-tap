@@ -22,6 +22,10 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn('os: [ubuntu-latest, macos-latest]', brew)
         self.assertIn('runs-on: ${{ matrix.os }}', brew)
         self.assertIn('FORMULA: ${{ matrix.formula }}', brew)
+        copy = 'cp "Formula/$FORMULA.rb" "$(brew --repository zaubermaerchen/tap)/Formula/$FORMULA.rb"'
+        self.assertIn(copy, brew)
+        self.assertIn("if: github.event_name != 'push' || github.ref != 'refs/heads/main'", brew)
+        self.assertLess(brew.index(copy), brew.index('brew install'))
         self.assertIn('brew install "zaubermaerchen/tap/$FORMULA"', brew)
         self.assertIn('brew test "zaubermaerchen/tap/$FORMULA"', brew)
 

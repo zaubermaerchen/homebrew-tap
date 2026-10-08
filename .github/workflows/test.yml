@@ -22,13 +22,21 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        formula: [khsier, pipewisp, dam, outage, sluice]
+        formula: [khsier, pipewisp, dam, outage, sluice, trysudo]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
       - uses: Homebrew/actions/setup-homebrew@9f17989bd508c794353d974d1756f23b0bcf10c1 # main
+      - name: Select checked-out candidate outside main pushes
+        if: github.event_name != 'push' || github.ref != 'refs/heads/main'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          FORMULA: ${{ matrix.formula }}
+        run: |
+          brew tap zaubermaerchen/tap
+          cp "Formula/$FORMULA.rb" "$(brew --repository zaubermaerchen/tap)/Formula/$FORMULA.rb"
       - name: Install and test formula
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
