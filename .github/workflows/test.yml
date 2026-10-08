@@ -29,19 +29,11 @@ jobs:
         with:
           persist-credentials: false
       - uses: Homebrew/actions/setup-homebrew@9f17989bd508c794353d974d1756f23b0bcf10c1 # main
-      - name: Select checked-out candidate outside main pushes
-        if: github.event_name != 'push' || github.ref != 'refs/heads/main'
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: 1
-          FORMULA: ${{ matrix.formula }}
-        run: |
-          brew tap zaubermaerchen/tap
-          cp "Formula/$FORMULA.rb" "$(brew --repository zaubermaerchen/tap)/Formula/$FORMULA.rb"
       - name: Install and test formula
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
           FORMULA: ${{ matrix.formula }}
         run: |
-          brew tap zaubermaerchen/tap
+          test "$(git -C "$(brew --repository zaubermaerchen/tap)" rev-parse HEAD)" = "$GITHUB_SHA"
           brew install "zaubermaerchen/tap/$FORMULA"
           brew test "zaubermaerchen/tap/$FORMULA"
