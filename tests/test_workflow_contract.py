@@ -28,6 +28,24 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn('brew install "zaubermaerchen/tap/$FORMULA"', brew)
         self.assertIn('brew test "zaubermaerchen/tap/$FORMULA"', brew)
 
+    def test_caller_guard_allows_trysudo_and_rejects_other_sources(self):
+        step = WORKFLOW.read_text().split('      - name: Validate caller and trusted revision\n', 1)[1]
+        script = textwrap.dedent(step.split('        run: |\n', 1)[1].split('      - uses:', 1)[0])
+        for formula, repository, ref, allowed in (
+            ('trysudo', 'zaubermaerchen/trysudo', 'main', True),
+            ('trysudo', 'zaubermaerchen/trysudo', 'a' * 40, True),
+            ('trysudo', 'other/trysudo', 'main', False),
+            ('trysudo', 'zaubermaerchen/sluice', 'main', False),
+            ('unknown', 'zaubermaerchen/unknown', 'main', False),
+            ('trysudo', 'zaubermaerchen/trysudo', 'unreviewed-branch', False),
+        ):
+            with self.subTest(formula=formula, repository=repository, ref=ref):
+                environment = dict(os.environ, FORMULA=formula, SOURCE_REPOSITORY=repository,
+                                   AUTOMATION_REF=ref)
+                result = subprocess.run(['bash', '-e', '-o', 'pipefail', '-c', script],
+                                        env=environment, capture_output=True, text=True)
+                self.assertEqual(result.returncode == 0, allowed, result.stderr)
+
     def test_writer_waits_for_validation_and_uses_scoped_app(self):
         workflow = WORKFLOW.read_text()
         writer = workflow.split('  pull-request:\n', 1)[1]

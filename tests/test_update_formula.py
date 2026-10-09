@@ -22,7 +22,7 @@ class UpdateFormulaTests(unittest.TestCase):
         return release, checksums
 
     def test_update_preserves_all_other_formula_content_and_is_idempotent(self):
-        for tool in ("khsier", "pipewisp", "dam", "outage", "sluice"):
+        for tool in ("khsier", "pipewisp", "dam", "outage", "sluice", "trysudo"):
             with self.subTest(tool=tool):
                 original = (ROOT / "Formula" / f"{tool}.rb").read_text()
                 release, sums = self.fixture(tool)

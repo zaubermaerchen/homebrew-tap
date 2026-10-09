@@ -10,7 +10,7 @@ validation or Homebrew tests prevent write-token creation and PR mutation.
 The supported caller must be `zaubermaerchen/<formula>`. Stable tags are `vX.Y.Z`;
 draft/prerelease releases are rejected. Required archives are darwin/linux ×
 arm64/amd64. khsier, pipewisp and dam use `<tool>_<tag>_<os>_<arch>.tar.gz`;
-outage and sluice use `<tool>-<tag>-<os>-<arch>.tar.gz`. All use `SHA256SUMS`.
+outage, sluice and trysudo use `<tool>-<tag>-<os>-<arch>.tar.gz`. All use `SHA256SUMS`.
 Checksums must use the standard `sha256sum` format with one entry per filename;
 missing, duplicate or malformed entries fail. The updater does not regenerate
 install/test blocks or other metadata. The updater code stays pinned while its
@@ -74,7 +74,7 @@ metadata, not writing to the tap. App-created PRs can trigger this tap's checks.
    jobs regenerate and retest the candidate; rerunning only the failed writer
    would reuse the stale base artifact.
 5. Only after khsier succeeds, add the same caller job to pipewisp, dam, outage,
-   then sluice. Pass the tool's name and published tag, the same App variable/secret,
+   sluice, then trysudo. Pass the tool's name and published tag, the same App variable/secret,
    and the same trusted tap SHA. Do not copy the updater or add formula-specific
    shell code to tool repositories. Check each project's asset names/checksum
    publication against the contract above before enabling it.

@@ -40,7 +40,7 @@ jobs:
           python3 - <<'PY'
           import os, re
           formula = os.environ['FORMULA']
-          assert formula in ('khsier', 'pipewisp', 'dam', 'outage', 'sluice'), 'Unsupported formula'
+          assert formula in ('khsier', 'pipewisp', 'dam', 'outage', 'sluice', 'trysudo'), 'Unsupported formula'
           assert os.environ['SOURCE_REPOSITORY'] == 'zaubermaerchen/' + formula, 'Unexpected caller'
           assert re.fullmatch(r'main|[0-9a-f]{40}', os.environ['AUTOMATION_REF']), 'Invalid tap revision'
           PY
