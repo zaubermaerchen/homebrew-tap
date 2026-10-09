@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update only release coordinates in the five maintained binary formulae."""
+"""Update only release coordinates in the maintained binary formulae."""
 import argparse
 import json
 import os
@@ -8,7 +8,7 @@ import re
 import urllib.request
 
 OWNER = "zaubermaerchen"
-TOOLS = {"khsier": "_", "pipewisp": "_", "dam": "_", "outage": "-", "sluice": "-"}
+TOOLS = {"khsier": "_", "pipewisp": "_", "dam": "_", "outage": "-", "sluice": "-", "trysudo": "-"}
 PLATFORMS = (("darwin", "arm64"), ("darwin", "amd64"), ("linux", "arm64"), ("linux", "amd64"))
 
 
