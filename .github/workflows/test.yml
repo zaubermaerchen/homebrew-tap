@@ -2,7 +2,14 @@ name: Formula checks
 
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      formula:
+        description: Formula name to check (empty checks all formulae)
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -10,19 +17,33 @@ permissions:
 jobs:
   updater:
     runs-on: ubuntu-latest
+    outputs:
+      formulae: ${{ steps.targets.outputs.formulae }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - run: python3 -m unittest discover -s tests -v
       - run: git diff --check
+      - name: Select formulae to check
+        id: targets
+        env:
+          FORMULA: ${{ inputs.formula }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          formulae=$(python3 scripts/select_formulae.py)
+          echo "formulae=$formulae" >> "$GITHUB_OUTPUT"
   brew:
+    needs: updater
+    if: needs.updater.outputs.formulae != '[]'
     name: Brew ${{ matrix.formula }} (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        formula: [khsier, pipewisp, dam, outage, sluice, trysudo]
+        formula: ${{ fromJSON(needs.updater.outputs.formulae) }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4

@@ -2,7 +2,6 @@
 from pathlib import Path
 import unittest
 import os
-import re
 import subprocess
 import tempfile
 import textwrap
@@ -11,14 +10,23 @@ WORKFLOW = Path(__file__).resolve().parents[1] / '.github/workflows/update-formu
 
 
 class WorkflowContractTests(unittest.TestCase):
-    def test_normal_checks_cover_all_formulae_on_both_platforms(self):
+    def test_normal_checks_use_selected_formulae_on_both_platforms(self):
         root = WORKFLOW.parents[2]
         workflow = (root / '.github/workflows/test.yml').read_text()
         brew = workflow.split('  brew:\n', 1)[1]
-        selected = re.search(r'formula: \[([^\]]+)\]', brew)
-        self.assertIsNotNone(selected, 'Native checks must select every formula')
-        formulae = [name.strip() for name in selected.group(1).split(',')]
-        self.assertCountEqual(formulae, [path.stem for path in (root / 'Formula').glob('*.rb')])
+        self.assertIn('needs: updater', brew)
+        self.assertIn("if: needs.updater.outputs.formulae != '[]'", brew)
+        self.assertIn('formula: ${{ fromJSON(needs.updater.outputs.formulae) }}', brew)
+        self.assertIn('branches: [main]', workflow)
+        self.assertIn('workflow_dispatch:', workflow)
+        self.assertIn('fetch-depth: 0', workflow)
+        self.assertIn('PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}', workflow)
+        self.assertIn('PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}', workflow)
+        self.assertIn('FORMULA: ${{ inputs.formula }}', workflow)
+        self.assertIn('formulae: ${{ steps.targets.outputs.formulae }}', workflow)
+        self.assertIn('python3 scripts/select_formulae.py', workflow)
+        self.assertIn('python3 -m unittest discover -s tests -v', workflow)
+        self.assertIn('git diff --check', workflow)
         self.assertIn('os: [ubuntu-latest, macos-latest]', brew)
         self.assertIn('runs-on: ${{ matrix.os }}', brew)
         self.assertIn('FORMULA: ${{ matrix.formula }}', brew)

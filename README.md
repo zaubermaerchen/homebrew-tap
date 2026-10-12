@@ -42,6 +42,20 @@ brew update
 brew upgrade khsier pipewisp dam outage sluice trysudo
 ```
 
+## Formula checks
+
+Pull requests install and test only added or changed `Formula/*.rb` files on
+Linux and macOS. Deleted formulae are excluded; documentation-only or
+deletion-only changes skip Brew checks. Changes outside `Formula/*.rb`,
+`README.md`, `LICENSE`, and `docs/` check all formulae, including shared
+workflows, scripts, and tests. If PR diff detection fails, all formulae are checked.
+
+Pushes to `main` check all formulae. In Actions, run **Formula checks** manually
+with an existing formula name (for example, `trysudo`) in the `formula` input;
+leave it empty to check all formulae. Invalid names fail before installation.
+The formula list is generated from `Formula/*.rb`. Python tests and
+`git diff --check` run even when Brew checks are skipped.
+
 ## Release automation
 
 Published releases can open formula-update PRs through the tap's shared workflow.
