@@ -1,26 +1,26 @@
 class Sluice < Formula
   desc "Switch Unix pipeline flow between open and closed states"
   homepage "https://github.com/zaubermaerchen/sluice"
-  version "0.2.3"
+  version "0.2.4"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/zaubermaerchen/sluice/releases/download/v0.2.3/sluice-v0.2.3-darwin-arm64.tar.gz"
-      sha256 "7c32cd4421df3dd5a6e0c955071eeb7f0f151924e9799cd776cbbcbb58afc935"
+      url "https://github.com/zaubermaerchen/sluice/releases/download/v0.2.4/sluice-v0.2.4-darwin-arm64.tar.gz"
+      sha256 "786bc68b2b90bfd3d8670e033e4a1c993fce4782047eac8821f5d3259e4e02f6"
     else
-      url "https://github.com/zaubermaerchen/sluice/releases/download/v0.2.3/sluice-v0.2.3-darwin-amd64.tar.gz"
-      sha256 "1eea7665deec85910eeb14858ea7df8b78ab71278dc1f9943d34e8f3ce73b9f2"
+      url "https://github.com/zaubermaerchen/sluice/releases/download/v0.2.4/sluice-v0.2.4-darwin-amd64.tar.gz"
+      sha256 "796742ce1f381629b2352929d9130c2fe14a7844cf1d73514ecbf51b5b22fd1b"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/zaubermaerchen/sluice/releases/download/v0.2.3/sluice-v0.2.3-linux-arm64.tar.gz"
-      sha256 "9c1f2fd49c7ef6e9df494885ad0fc686c0a0da245ec73b78c7ff9850fb697d37"
+      url "https://github.com/zaubermaerchen/sluice/releases/download/v0.2.4/sluice-v0.2.4-linux-arm64.tar.gz"
+      sha256 "dd251a4e08192e3946d74baec35eb4aaa48747f51c8ad8fa0f687d92cb93acfb"
     else
-      url "https://github.com/zaubermaerchen/sluice/releases/download/v0.2.3/sluice-v0.2.3-linux-amd64.tar.gz"
-      sha256 "a73461b4d00456a73a1d85ad2b60a35e7b105eacb6b1cb016dcd878183226576"
+      url "https://github.com/zaubermaerchen/sluice/releases/download/v0.2.4/sluice-v0.2.4-linux-amd64.tar.gz"
+      sha256 "5c85f1e9c1d28146b082e8ff1856da5ce265962cbc6f6684d59634b21e0597df"
     end
   end
 
